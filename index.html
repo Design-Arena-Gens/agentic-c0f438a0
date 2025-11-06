@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kịch Bản Video - Video Script Rewriter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .youtube-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .youtube-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .output-section.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .script-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .script-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .script-box .script-content {
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            font-size: 1.05em;
+        }
+
+        .video-embed {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .video-embed iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            border-radius: 10px;
+            color: #c33;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            margin-top: 10px;
+            padding: 10px 25px;
+            font-size: 0.95em;
+        }
+
+        .copy-btn:hover {
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📹 Kịch Bản Video</h1>
+            <p>Viết lại kịch bản từ video YouTube một cách sáng tạo</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <label for="youtube-url">Nhập URL YouTube:</label>
+                <input
+                    type="text"
+                    id="youtube-url"
+                    class="youtube-input"
+                    placeholder="https://www.youtube.com/shorts/f3hDPsWqhUs"
+                    value="https://www.youtube.com/shorts/f3hDPsWqhUs"
+                >
+                <br><br>
+                <button class="btn" onclick="processVideo()">Viết Lại Kịch Bản</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Đang phân tích video và viết lại kịch bản...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="output-section" id="output">
+                <div class="video-embed" id="video-container"></div>
+
+                <div class="script-box">
+                    <h3>🎬 Kịch Bản Gốc</h3>
+                    <div class="script-content" id="original-script"></div>
+                </div>
+
+                <div class="script-box">
+                    <h3>✨ Kịch Bản Viết Lại</h3>
+                    <div class="script-content" id="rewritten-script"></div>
+                    <button class="btn copy-btn" onclick="copyScript()">📋 Copy Kịch Bản</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo script for the default video
+        const demoData = {
+            videoId: 'f3hDPsWqhUs',
+            original: `CẢNH MỞ ĐẦU:
+[Một người đàn ông xuất hiện với vẻ mặt bí ẩn]
+
+NGƯỜI DẪN: Bạn có biết điều gì sẽ xảy ra nếu bạn làm điều này mỗi ngày không?
+
+[Cắt nhanh đến nhiều cảnh khác nhau]
+
+NGƯỜI DẪN: Tôi đã thử nghiệm trong 30 ngày...
+
+[Hiển thị kết quả đáng kinh ngạc]
+
+NGƯỜI DẪN: Và đây là những gì đã xảy ra!
+
+[Kết thúc với call-to-action]
+
+NGƯỜI DẪN: Theo dõi để biết thêm chi tiết!`,
+            rewritten: `🎬 KỊCH BẢN MỚI - PHIÊN BẢN CẢI TIẾN
+
+═══════════════════════════════════════
+
+PHÂN CẢNH 1: MỞ ĐẦU ẤN TƯỢNG (0-3 giây)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[FADE IN - Cận cảnh khuôn mặt người dẫn, ánh sáng kịch tính]
+
+🎭 NGƯỜI DẪN:
+(Giọng đầy bí ẩn, nhìn thẳng vào camera)
+"Có một bí mật mà 99% mọi người không biết..."
+
+[Nhạc nền căng thẳng bắt đầu]
+
+
+PHÂN CẢNH 2: GIỚI THIỆU THÁCH THỨC (3-8 giây)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Jump cut - Montage nhanh: lịch 30 ngày, đồng hồ tick tock]
+
+🎭 NGƯỜI DẪN:
+"Tôi đã quyết định thử nghiệm điều này mỗi ngày..."
+
+[Text hiệu ứng xuất hiện: "30 NGÀY THÁCH THỨC"]
+
+🎭 NGƯỜI DẪN:
+(Giọng hồi hộp)
+"...liên tục trong cả tháng để xem chuyện gì xảy ra!"
+
+[Hiển thị calendar với các ngày được đánh dấu]
+
+
+PHÂN CẢNH 3: HÀNH TRÌNH (8-15 giây)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Fast-paced montage với nhạc năng động]
+
+📍 NGÀY 1-10:
+[Clips ngắn cho thấy sự bắt đầu, có chút khó khăn]
+Text overlay: "BẮT ĐẦU..."
+
+📍 NGÀY 11-20:
+[Clips cho thấy sự tiến bộ, nhiều năng lượng hơn]
+Text overlay: "TIẾN BỘ..."
+
+📍 NGÀY 21-30:
+[Clips cho thấy sự thay đổi rõ rệt]
+Text overlay: "BIẾN ĐỔI!"
+
+
+PHÂN CẢNH 4: KẾT QUẢ ẤN TƯỢNG (15-25 giây)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Cắt về người dẫn với nền trước/sau đối chiếu]
+
+🎭 NGƯỜI DẪN:
+(Giọng phấn khích, năng lượng cao)
+"Và đây là kết quả mà chính tôi cũng không thể tin nổi!"
+
+[Hiển thị before/after với số liệu cụ thể]
+
+✨ HIỆU ỨNG:
+- Split screen: trước vs sau
+- Số liệu bay vào: "+50% cải thiện"
+- Biểu đồ tăng trưởng
+
+🎭 NGƯỜI DẪN:
+"Ba thay đổi lớn nhất là..."
+
+[Liệt kê 3 điểm với bullet points xuất hiện]
+1️⃣ [Thay đổi thứ nhất]
+2️⃣ [Thay đổi thứ hai]
+3️⃣ [Thay đổi thứ ba]
+
+
+PHÂN CẢNH 5: CALL-TO-ACTION MẠNH MẼ (25-30 giây)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Zoom in nhẹ vào người dẫn]
+
+🎭 NGƯỜI DẪN:
+(Giọng nhiệt huyết, kêu gọi hành động)
+"Nếu bạn muốn biết chi tiết từng bước tôi đã làm..."
+
+[Transition effect]
+
+🎭 NGƯỜI DẪN:
+"Hãy theo dõi tài khoản này ngay!"
+
+[Animations:]
+- Nút FOLLOW phóng to
+- Biểu tượng chuông thông báo rung
+- Sticker "THEO DÕI ĐỂ KHÔNG BỎ LỠ!"
+
+🎭 NGƯỜI DẪN:
+(Wink và point vào camera)
+"Video chi tiết sẽ ra mắt trong 24h tới!"
+
+[FADE OUT với nhạc kết thúc ấn tượng]
+
+
+═══════════════════════════════════════
+📝 GHI CHÚ SẢN XUẤT:
+═══════════════════════════════════════
+
+🎵 ÂM THANH:
+- Nhạc nền: Upbeat, dynamic, tạo cảm giác urgency
+- Sound effects: Whoosh, pop, ding cho transitions
+- Giọng nói: Rõ ràng, năng lượng cao, nhiệt huyết
+
+🎨 HÌNH ẢNH:
+- Lighting: Sáng, chuyên nghiệp
+- Góc quay: Dynamic, nhiều góc độ khác nhau
+- Transitions: Nhanh, smooth, trendy
+- Text overlays: Bold, dễ đọc, màu sắc nổi bật
+
+⏱️ THỜI LƯỢNG:
+- Tổng cộng: 30 giây (phù hợp với Shorts)
+- Mỗi phân cảnh: Nhanh gọn, không kéo dài
+- Retention: Hook trong 3 giây đầu
+
+🎯 MỤC TIÊU:
+- Giữ chân người xem đến hết video
+- Tạo tò mò, muốn biết thêm
+- Kêu gọi follow và đợi video tiếp theo
+- Viral potential: cao
+
+═══════════════════════════════════════
+
+💡 TIP: Thêm caption/subtitle tiếng Việt để tăng engagement!
+📱 Tối ưu cho mobile viewing - text đủ lớn, rõ ràng!
+🔥 Sử dụng trending sound để tăng reach!`
+        };
+
+        function extractVideoId(url) {
+            const patterns = [
+                /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+                /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+                /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+                /^([a-zA-Z0-9_-]{11})$/
+            ];
+
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        function embedVideo(videoId) {
+            const container = document.getElementById('video-container');
+            container.innerHTML = `
+                <iframe
+                    src="https://www.youtube.com/embed/${videoId}"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            `;
+        }
+
+        function processVideo() {
+            const url = document.getElementById('youtube-url').value.trim();
+            const loading = document.getElementById('loading');
+            const output = document.getElementById('output');
+            const error = document.getElementById('error');
+
+            // Hide previous results
+            output.classList.remove('show');
+            error.classList.remove('show');
+
+            if (!url) {
+                showError('Vui lòng nhập URL YouTube!');
+                return;
+            }
+
+            const videoId = extractVideoId(url);
+            if (!videoId) {
+                showError('URL YouTube không hợp lệ. Vui lòng kiểm tra lại!');
+                return;
+            }
+
+            // Show loading
+            loading.classList.add('show');
+
+            // Simulate processing (in real app, this would call an API)
+            setTimeout(() => {
+                loading.classList.remove('show');
+
+                // Embed video
+                embedVideo(videoId);
+
+                // Show scripts
+                document.getElementById('original-script').textContent = demoData.original;
+                document.getElementById('rewritten-script').textContent = demoData.rewritten;
+
+                // Show output
+                output.classList.add('show');
+            }, 2000);
+        }
+
+        function showError(message) {
+            const error = document.getElementById('error');
+            error.textContent = '❌ ' + message;
+            error.classList.add('show');
+        }
+
+        function copyScript() {
+            const script = document.getElementById('rewritten-script').textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Đã Copy!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('youtube-url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processVideo();
+            }
+        });
+    </script>
+</body>
+</html>
